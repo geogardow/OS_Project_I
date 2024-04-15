@@ -1,23 +1,29 @@
-FILE *fptr;
+#include <stdio.h>
 
-// Open a file in read mode
-fptr = fopen("filename.txt", "r");
-
-// Store the content of the file
-char myString[100];
-
-// If the file exist
-if(fptr != NULL) {
-
-  // Read the content and print it
-  while(fgets(myString, 100, fptr)) {
-    printf("%s", myString);
-  }
-
-// If the file does not exist
-} else {
-  printf("Not able to open the file.");
+int main()
+{
+    read_char();
+    return 0;
 }
 
-// Close the file
-fclose(fptr);
+int read_char(){
+    char *filename = "readme.txt";
+    FILE *fp = fopen(filename, "r");
+
+    if (fp == NULL)
+    {
+        printf("Error: could not open file %s", filename);
+        return 1;
+    }
+
+    // read one character at a time and
+    // display it to the output
+    char ch;
+    while ((ch = fgetc(fp)) != EOF)
+        putchar(ch);
+
+    // close the file
+    fclose(fp);
+
+    return 0;
+}
