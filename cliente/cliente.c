@@ -31,7 +31,7 @@ int read_char(int char_pos){
 
     char_pos++;
 
-    // Move the file pointer to the 100th character (offset 99)
+    // Move the file pointer to char_pos character
     if (fseek(fp, char_pos, SEEK_SET) != 0) {
         printf("Error: fseek failed\n");
         fclose(fp);
