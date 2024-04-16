@@ -35,7 +35,7 @@ void update_read_flag_to_true(){
 }
 
 int read_char(int char_pos){
-    const char* filename = "readme.txt";
+    const char* filename = "input.txt";
     FILE* fp = fopen(filename, "r");
 
     if (fp == NULL) {

@@ -63,7 +63,7 @@ bool is_finished(void){
 void write(char ch)
 {
     // Open file in write mode
-    FILE* copyFile = fopen("copy.txt", "a");
+    FILE* copyFile = fopen("output.txt", "a");
 
     if (copyFile == NULL) {
         printf("Error opening file.\n");
