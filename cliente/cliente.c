@@ -1,4 +1,11 @@
 #include <stdio.h>
+#include <stdbool.h> 
+
+bool is_finised();
+int get_char_pos();
+void write_char_pos_mem(int current_char_pos);
+void update_read_flag_to_true();
+int read_char(int char_pos);
 
 int main()
 {
@@ -7,18 +14,25 @@ int main()
     return 0;
 }
 
+bool is_finised(){
+    // TODO: Read from mem read flag to know if reading process is finished
+    return false;
+}
+
 int get_char_pos(){
-    return 9;
+    // TODO: Read from mem current read counter to know char position
+    return 2;
 }
 
 void write_char_pos_mem(int current_char_pos){
+    // TODO: Write read counter in mem
     printf("The number is: %d\n", current_char_pos);
 }
 
 void update_read_flag_to_true(){
+    // TODO: Write read flag to true to indicate reading is finished 
     printf("True");
 }
-
 
 int read_char(int char_pos){
     const char* filename = "readme.txt";
