@@ -1,8 +1,3 @@
-/*
-   It writes to a previously created memory object "/myMemoryObj"
-   to be compiled with "-lrt"
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
@@ -12,10 +7,9 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <string.h>
- 
-#define SMOBJ_NAME  "/myMemoryObj"
+#include <creador/creador.h>
 
-void write_mem(char ch);
+void write_mem_chars(char ch, int);
 
 int main(void)
 {
@@ -24,12 +18,12 @@ int main(void)
    return 0;
 }
 
-void write_mem(char ch)
+void write_mem_chars(char ch, int buffer_index)
 {
    int fd;
    char *ptr;
    
-   fd = shm_open (SMOBJ_NAME,  O_RDWR  , 00200); /* open s.m object*/
+   fd = shm_open (SMOBJ_NAME_MEM_CHARS,  O_RDWR  , 00200); /* open s.m object*/
    if(fd == -1)
    {
       printf("Error file descriptor %s\n", strerror(errno));
