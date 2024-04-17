@@ -44,6 +44,10 @@ struct stats_data {
 #define SMOBJ_NAME_MEM_CHARS  "/mem_chars"
 #define SMOBJ_NAME_MEM_DATA  "/mem_data"
 #define SMOBJ_NAME_MEM_STATS  "/mem_stats"
+#define SMOBJ_SEM_READ_BUFFER  "read_from_buffer_sem"
+#define SMOBJ_SEM_WRITE_BUFFER  "write_to_buffer_sem"
+#define SMOBJ_SEM_READ_FILE  "read_from_file_sem"
+#define SMOBJ_SEM_WRITE_FILE  "write_to_file_sem"
 
 int SIZEOF_SMOBJ_MEM_CHARS;
 int CHARS_IN_BUFFER;
