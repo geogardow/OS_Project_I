@@ -15,17 +15,16 @@
  
 #define SMOBJ_NAME  "/myMemoryObj"
 
-void write_mem(char ch, int address);
+void write_mem(char ch);
 
 int main(void)
 {
    char ch = 'h';
-   int address = 0x0;
-   write_mem(ch, address);
+   write_mem(ch);
    return 0;
 }
 
-void write_mem(char ch, int address)
+void write_mem(char ch)
 {
    int fd;
    char *ptr;
@@ -37,7 +36,7 @@ void write_mem(char ch, int address)
 	   exit(1);
    }
    
-   ptr = mmap((void*) address, sizeof(ch), PROT_WRITE, MAP_SHARED, fd, 0);
+   ptr = mmap(NULL, sizeof(ch), PROT_WRITE, MAP_SHARED, fd, 0);
    if(ptr == MAP_FAILED)
    {
       printf("Map failed in write process: %s\n", strerror(errno));

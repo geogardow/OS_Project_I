@@ -17,12 +17,11 @@
 
 int main(void)
 {
-   int address = 0x0;
-   read_mem(address);
+   read_mem();
    return 0;
 }
 
-void read_mem(int address)
+void read_mem()
 {
    int fd;
    char *ptr;
@@ -42,7 +41,7 @@ void read_mem(int address)
    }
 
    // first parameter in mmap is the address
-   ptr = mmap((void*) address, shmobj_st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+   ptr = mmap(NULL, shmobj_st.st_size, PROT_READ, MAP_SHARED, fd, 0);
    if(ptr == MAP_FAILED)
    {
       printf("Map failed in read process: %s\n", strerror(errno));
