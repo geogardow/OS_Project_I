@@ -13,17 +13,21 @@ int main(int argc, char *argv[])
     create_memory(SMOBJ_NAME_MEM_CHARS, SIZEOF_SMOBJ_MEM_CHARS);
     create_memory(SMOBJ_NAME_MEM_DATA, SIZEOF_SMOBJ_MEM_DATA);
     create_memory(SMOBJ_NAME_MEM_STATS, SIZEOF_SMOBJ_MEM_STATS);
+    
+    struct mem_data mem_data_instance;
+    struct stats_data stats_data_instance;
+    build_mem_data_instance(&mem_data_instance);
+    build_stats_data_instance(&stats_data_instance);
+
+    write_to_memdata(mem_data_instance);
+    write_to_stats(stats_data_instance);
 
     init_semaphores();
-
-    struct mem_data mem_data_instance;
-    build_data_instance(&mem_data_instance);
-    print_data_struct(&mem_data_instance);
 
     return 0;
 }
 
-int create_memory(const char *name, int size){
+void create_memory(const char *name, int size){
     int fd;
     fd = shm_open(name, O_CREAT | O_RDWR  , 00700); /* create s.m object*/
     if(fd == -1)
@@ -40,7 +44,7 @@ int create_memory(const char *name, int size){
     close(fd);
 }
 
-int init_semaphores(){
+void init_semaphores(){
     read_from_buffer_sem = sem_open(SMOBJ_SEM_READ_BUFFER, O_CREAT, S_IRUSR | S_IWUSR, 0);
     write_to_buffer_sem = sem_open(SMOBJ_SEM_WRITE_BUFFER, O_CREAT, S_IRUSR | S_IWUSR, CHARS_IN_BUFFER);
     read_from_file_sem = sem_open(SMOBJ_SEM_READ_FILE, O_CREAT, S_IRUSR | S_IWUSR, MAX_READ_FILES);
@@ -48,7 +52,7 @@ int init_semaphores(){
 
 }
 
-int build_data_instance(struct mem_data *mem_data_instance){
+void build_mem_data_instance(struct mem_data *mem_data_instance){
     mem_data_instance->buffer_size = CHARS_IN_BUFFER; // Tamaño del buffer circular
     mem_data_instance->read_counter = 0;
     mem_data_instance->write_counter = 0;
@@ -62,4 +66,16 @@ void print_data_struct(struct mem_data *data) {
     printf("Write Counter: %d\n", data->write_counter);
     printf("Read Flag: %c\n", data->read_flag);
     printf("Write Flag: %c\n", data->write_flag);
+}
+
+void build_stats_data_instance(struct stats_data *stats_data_instance){
+    stats_data_instance->client_blocked_time = 0;
+    stats_data_instance->reconstructor_blocked_time = 0;
+    stats_data_instance->transferred_chars = 0;
+    stats_data_instance->chars_in_buffer = 0;
+    stats_data_instance->used_memory = 0;
+    stats_data_instance->client_kernel_time = 0;
+    stats_data_instance->reconstructor_kernel_time = 0;
+    stats_data_instance->client_user_time = 0;
+    stats_data_instance->reconstructor_user_time = 0;
 }

@@ -1,28 +1,30 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <sys/stat.h>        /* For mode constants */
-#include <fcntl.h>           /* For O_* constants */
-#include <unistd.h>
-#include <sys/types.h>
-#include <errno.h>
-#include <string.h>
-#include <creador/creador.h>
+#include "write.h"
 
-void write_mem_chars(char ch, int);
 
-int main(void)
-{
-   char ch = 'h';
-   write_mem(ch);
-   return 0;
-}
-
-void write_mem_chars(char ch, int buffer_index)
+void write_to_buffer(char ch, int buffer_index)
 {
    int fd;
    char *ptr;
+
+   struct buffer_data data;
+   data.character = ch;
    
+   // Get current date
+   time_t current_time = time(NULL);
+   char date_string[sizeof(data.date)];
+   strftime(date_string, sizeof(data.date), "%Y-%m-%d", localtime(&current_time));
+   strncpy(data.date, date_string, sizeof(data.date));
+   data.date[sizeof(data.date) - 1] = '\0'; // Ensure null-termination
+   printf("The current date is: %s\n", data.date);
+
+
+   // Get current time
+   char time_string[sizeof(data.time)];
+   strftime(time_string, sizeof(data.time), "%H:%M:%S", localtime(&current_time));
+   strncpy(data.time, time_string, sizeof(data.time));
+   data.time[sizeof(data.time) - 1] = '\0'; // Ensure null-termination
+   printf("The current time is: %s\n", data.time);
+
    fd = shm_open (SMOBJ_NAME_MEM_CHARS,  O_RDWR  , 00200); /* open s.m object*/
    if(fd == -1)
    {
@@ -30,14 +32,64 @@ void write_mem_chars(char ch, int buffer_index)
 	   exit(1);
    }
    
-   ptr = mmap(NULL, sizeof(ch), PROT_WRITE, MAP_SHARED, fd, 0);
+   ptr = mmap(NULL, 3100, PROT_WRITE, MAP_SHARED, fd, 0);
    if(ptr == MAP_FAILED)
    {
       printf("Map failed in write process: %s\n", strerror(errno));
       exit(1);
    }
    
-   memcpy(ptr,ch, sizeof(ch));
-   printf("%d \n", (int)sizeof(ch));
+   char *data_ptr= (char*)&data;
+   char *address = ptr + (buffer_index * SIZEOF_BUFFER_DATA_STRUCT);
+   memmove(address, data_ptr, SIZEOF_BUFFER_DATA_STRUCT);
+   printf("Char: %s, Date: %s, Time: %s, Address: %s \n", data.character, data.date, data.time, address);
+   close(fd);
+}
+
+void write_to_stats(struct stats_data stats)
+{
+   int fd;
+   char *ptr;
+
+   fd = shm_open (SMOBJ_NAME_MEM_STATS,  O_RDWR  , 00200); /* open s.m object*/
+   if(fd == -1)
+   {
+      printf("Error file descriptor %s\n", strerror(errno));
+	   exit(1);
+   }
+   
+   ptr = mmap(NULL, SIZEOF_SMOBJ_MEM_STATS, PROT_WRITE, MAP_SHARED, fd, 0);
+   if(ptr == MAP_FAILED)
+   {
+      printf("Map failed in write process: %s\n", strerror(errno));
+      exit(1);
+   }
+   
+   char *data_ptr= (char*)&stats;
+   memmove(ptr, data_ptr, SIZEOF_SMOBJ_MEM_STATS);
+   close(fd);
+}
+
+void write_to_memdata(struct mem_data mem)
+{
+   int fd;
+   char *ptr;
+
+   fd = shm_open (SMOBJ_NAME_MEM_DATA,  O_RDWR  , 00200); /* open s.m object*/
+   if(fd == -1)
+   {
+      printf("Error file descriptor %s\n", strerror(errno));
+	   exit(1);
+   }
+   
+   ptr = mmap(NULL, SIZEOF_SMOBJ_MEM_DATA, PROT_WRITE, MAP_SHARED, fd, 0);
+   if(ptr == MAP_FAILED)
+   {
+      printf("Map failed in write process: %s\n", strerror(errno));
+      exit(1);
+   }
+   
+   char *data_ptr= (char*)&mem;
+   memmove(ptr, data_ptr, SIZEOF_SMOBJ_MEM_STATS);
    close(fd);
 }
