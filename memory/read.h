@@ -1,5 +1,5 @@
-#ifndef WRITE_H
-#define WRITE_H
+#ifndef READ_H
+#define READ_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,8 +13,8 @@
 #include <time.h>
 #include "../constants.h"
 
-void write_to_buffer(char ch, int buffer_index);
-void write_to_stats(struct stats_data stats);
-void write_to_memdata(struct mem_data mem);
+struct buffer_data read_from_buffer(int buffer_index);
+struct stats_data read_from_stats();
+struct mem_data read_from_memdata();
 
 #endif 
