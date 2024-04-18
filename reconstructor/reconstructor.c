@@ -1,21 +1,65 @@
 #include <stdio.h>
 #include <stdbool.h> 
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>        /* For mode constants */
+#include <semaphore.h>
+#include "../constants.h"
+#include "../memory/read.c"
+
 
 char get_char_from_struct(void);
 void write(char ch);
 bool is_finished(void);
-int get_current_char_counter(void);
-void write_counter_mem(int current_char_counter);
-void update_write_flag_to_true(void);
-int get_file_length(void);
 
 int main()
 {
-    bool finished_flag = is_finished();
-    char character = get_char_from_struct();
-    if (!finished_flag){
-        write(character);
+
+    write_to_file_sem = sem_open(SMOBJ_SEM_WRITE_FILE, O_CREAT, 0660, 1);
+    if (write_to_file_sem == SEM_FAILED){
+        printf("Error: Could not open write file semaphore");
+        exit(1);
     }
+
+    read_from_buffer_sem = sem_open(SMOBJ_SEM_READ_BUFFER, 0);
+    if (read_from_buffer_sem == SEM_FAILED){
+        printf("Error: Could not open read buffer semaphore");
+        exit(1);
+    }
+
+    write_to_buffer_sem = sem_open(SMOBJ_SEM_WRITE_BUFFER, 0);
+    if (write_to_buffer_sem == SEM_FAILED){
+        printf("Error: Could not open write buffer semaphore");
+        exit(1);
+    }
+
+    mem_data_sem = sem_open(SMOBJ_SEM_MEM_DATA, 0);
+    if (mem_data_sem == SEM_FAILED){
+        printf("Error: Could not open mem data semaphore");
+        exit(1);
+    }
+
+    while (true)
+    {
+        sem_wait(read_from_file_sem); // wait to read from buffer
+        // read from  buffer
+        char character = get_char_from_struct();
+        sem_post(write_to_buffer_sem); // the resource is ready to be written
+
+        sem_wait(write_to_file_sem); // wait to write to file
+        sem_wait(mem_data_sem);
+        struct mem_data data = read_from_mem_data();
+        write(character);
+        if(is_finished()){
+            break;
+        }
+        sem_post(mem_data_sem)
+        sem_post(write_to_file_sem); // release resource for other process
+    }
+    
+    sem_close(write_to_buffer_sem);
+    sem_close(write_to_file_sem);
+    sem_close(read_from_buffer_sem);
+    
     return 0;
 }
 
@@ -25,37 +69,15 @@ char get_char_from_struct(void)
     return temp;
 }
 
-int get_current_char_counter(void){
-    // TODO: Get count of characters
-    return 2;
-}
-
-int get_file_length(void){
-    // TODO: Get total of characters in file
-    return 9;
-}
-
-void write_counter_mem(int current_char_counter){
-    // TODO: Write write counter in mem
-    printf("The number is: %d\n", current_char_counter);
-}
-
-void update_write_flag_to_true(void){
-    // TODO: Write read flag to true to indicate writing is finished 
-    printf("True");
-}
-
-bool is_finished(void){
-    int current_counter = get_current_char_counter();
-    int file_length = get_file_length();
-
-    if (current_counter == file_length) {
-        update_write_flag_to_true();
+bool is_finished(struct mem_data data){
+    if ((data.write_counter + 1 == data.read_counter) && (data.read_flag)) {
+        data.write_flag = '1';
+        write_to_mem_data(data);
         return true;
     }
     else{
-        current_counter ++;
-        write_counter_mem(current_counter);
+        data.write_counter = data.write_counter + 1;
+        write_to_mem_data(data);
         return false;
     }
 }

@@ -12,14 +12,16 @@
 #include "../memory/write.c"
 #include "../constants.h"
 
-
-int SIZEOF_SMOBJ_MEM_CHARS;
-int CHARS_IN_BUFFER;
-
 sem_t *read_from_buffer_sem;
 sem_t *write_to_buffer_sem;
 sem_t *read_from_file_sem;
 sem_t *write_to_file_sem;
+sem_t *mem_data_sem;
+sem_t *mem_stats_sem;
+
+
+int SIZEOF_SMOBJ_MEM_CHARS;
+int CHARS_IN_BUFFER;
 
 void create_memory(const char *name, int size);
 void init_semaphores();

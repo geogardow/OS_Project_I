@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <semaphore.h>
+
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
@@ -16,6 +20,9 @@
 #define SMOBJ_SEM_WRITE_BUFFER  "write_to_buffer_sem"
 #define SMOBJ_SEM_READ_FILE  "read_from_file_sem"
 #define SMOBJ_SEM_WRITE_FILE  "write_to_file_sem"
+#define SMOBJ_SEM_MEM_DATA  "mem_data_sem"
+#define SMOBJ_SEM_MEM_STATS  "mem_stats_sem"
+
 
 struct buffer_data {
     char character;

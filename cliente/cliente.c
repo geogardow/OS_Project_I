@@ -1,40 +1,80 @@
 #include <stdio.h>
-#include <stdbool.h> 
+#include <stdbool.h>
+#include <semaphore.h>
+#include <fcntl.h>
+#include "../constants.h"
+#include "../memory/read.c"
 
-bool is_finised();
-int get_char_pos();
-void write_char_pos_mem(int current_char_pos);
-void update_read_flag_to_true();
-int read_char(int char_pos);
+sem_t *read_from_buffer_sem;
+sem_t *write_to_buffer_sem;
+sem_t *read_from_file_sem;
+sem_t *mem_data_sem;
+sem_t *mem_stats_sem;
+
+
+bool is_finished(struct mem_data data);
+int read_char(struct mem_data data);
 
 int main()
 {
-    int char_pos = get_char_pos();
-    read_char(char_pos);
-    return 0;
+    read_from_file_sem = sem_open(SMOBJ_SEM_READ_FILE, 0);
+    if (read_from_file_sem == SEM_FAILED){
+        printf("Error: Could not open read file semaphore");
+        exit(1);
+    }
+
+    read_from_buffer_sem = sem_open(SMOBJ_SEM_READ_BUFFER, 0);
+    if (read_from_buffer_sem == SEM_FAILED){
+        printf("Error: Could not open read buffer semaphore");
+        exit(1);
+    }
+
+    write_to_buffer_sem = sem_open(SMOBJ_SEM_WRITE_BUFFER, 0);
+    if (write_to_buffer_sem == SEM_FAILED){
+        printf("Error: Could not open write buffer semaphore");
+        exit(1);
+    }
+
+    mem_data_sem = sem_open(SMOBJ_SEM_MEM_DATA, 0);
+    if (mem_data_sem == SEM_FAILED){
+        printf("Error: Could not open mem data semaphore");
+        exit(1);
+    }
+
+    while (true)
+    {
+        sem_wait(read_from_file_sem); // wait read is using resource
+        sem_wait(mem_data_sem);
+        struct mem_data data = read_from_mem_data();
+        
+        if (is_finished(data)){
+            break;
+        }
+
+        read_char(data);
+        sem_post(mem_data_sem);
+        sem_post(read_from_file_sem); // resource released
+
+        sem_wait(write_to_buffer_sem); // wait to write buffer
+        // write to buffer
+        sem_post(read_from_buffer_sem); // tell reconstructor that it can read
+
+    }
+
+    sem_close(write_to_buffer_sem);
+    sem_close(read_from_buffer_sem);
+    sem_close(read_from_file_sem);
+    sem_close(mem_data_sem);
+
 }
 
-bool is_finised(){
-    // TODO: Read from mem read flag to know if reading process is finished
-    return false;
+bool is_finished(struct mem_data mem){
+    bool flag;
+    flag = (mem.read_flag == '1');
+    return flag;
 }
 
-int get_char_pos(){
-    // TODO: Read from mem current read counter to know char position
-    return 2;
-}
-
-void write_char_pos_mem(int current_char_pos){
-    // TODO: Write read counter in mem
-    printf("The number is: %d\n", current_char_pos);
-}
-
-void update_read_flag_to_true(){
-    // TODO: Write read flag to true to indicate reading is finished 
-    printf("True");
-}
-
-int read_char(int char_pos){
+int read_char(struct mem_data data){
     const char* filename = "input.txt";
     FILE* fp = fopen(filename, "r");
 
@@ -43,7 +83,7 @@ int read_char(int char_pos){
         return 1;
     }
 
-    char_pos++;
+    int char_pos = data.read_counter;
 
     // Move the file pointer to char_pos character
     if (fseek(fp, char_pos, SEEK_SET) != 0) {
@@ -56,12 +96,15 @@ int read_char(int char_pos){
     int ch = fgetc(fp);
     if (ch == EOF) {
         printf("Error: End of file reached\n");
-        update_read_flag_to_true();
+        data.read_flag = '1';
+        write_to_mem_data(data);
         fclose(fp);
         return 1;
     }
 
-    write_char_pos_mem(char_pos);
+    data.read_counter = char_pos + 1;
+
+    write_to_mem_data(data);
     
     printf("The character in the file is: %c\n", (char)ch);
 

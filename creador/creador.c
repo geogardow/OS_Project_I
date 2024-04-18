@@ -45,10 +45,19 @@ void create_memory(const char *name, int size){
 }
 
 void init_semaphores(){
+    sem_unlink(SMOBJ_SEM_READ_BUFFER);
+    sem_unlink(SMOBJ_SEM_WRITE_BUFFER);
+    sem_unlink(SMOBJ_SEM_READ_FILE);
+    sem_unlink(SMOBJ_SEM_WRITE_FILE);
+    sem_unlink(SMOBJ_SEM_MEM_DATA);
+    sem_unlink(SMOBJ_SEM_MEM_STATS);
+
     read_from_buffer_sem = sem_open(SMOBJ_SEM_READ_BUFFER, O_CREAT, S_IRUSR | S_IWUSR, 0);
     write_to_buffer_sem = sem_open(SMOBJ_SEM_WRITE_BUFFER, O_CREAT, S_IRUSR | S_IWUSR, CHARS_IN_BUFFER);
     read_from_file_sem = sem_open(SMOBJ_SEM_READ_FILE, O_CREAT, S_IRUSR | S_IWUSR, MAX_READ_FILES);
     write_to_file_sem = sem_open(SMOBJ_SEM_WRITE_FILE, O_CREAT, S_IRUSR | S_IWUSR, MAX_WRITE_FILES);
+    mem_data_sem = sem_open(SMOBJ_SEM_MEM_DATA, O_CREAT, S_IRUSR | S_IWUSR, 1);
+    mem_stats_sem = sem_open(SMOBJ_SEM_MEM_STATS, O_CREAT, S_IRUSR | S_IWUSR, 1);
 
 }
 

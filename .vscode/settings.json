@@ -3,6 +3,9 @@
         "stat.h": "c",
         "fcntl.h": "c",
         "errno.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "constants.h": "c",
+        "semaphore.h": "c",
+        "stdbool.h": "c"
     }
 }
