@@ -15,6 +15,6 @@
 
 struct buffer_data read_from_buffer(int buffer_index);
 struct stats_data read_from_stats();
-struct mem_data read_from_memdata();
+struct mem_data read_from_mem_data();
 
 #endif 

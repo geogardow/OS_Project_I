@@ -15,6 +15,6 @@
 
 void write_to_buffer(char ch, int buffer_index);
 void write_to_stats(struct stats_data stats);
-void write_to_memdata(struct mem_data mem);
+void write_to_mem_data(struct mem_data mem);
 
 #endif 

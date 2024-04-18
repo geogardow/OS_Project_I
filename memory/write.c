@@ -67,7 +67,7 @@ void write_to_stats(struct stats_data stats)
    close(fd);
 }
 
-void write_to_memdata(struct mem_data mem)
+void write_to_mem_data(struct mem_data mem)
 {
    int fd;
    char *ptr;
