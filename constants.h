@@ -19,7 +19,7 @@
 
 struct buffer_data {
     char character;
-    char date[20]; // Formato YYYY-MM-DD
+    char date[12]; // Formato YYYY-MM-DD
     char time[10];  // Formato HH:MM:SS
 };
 

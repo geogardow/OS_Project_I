@@ -15,16 +15,13 @@ void write_to_buffer(char ch, int buffer_index)
    strftime(date_string, sizeof(data.date), "%Y-%m-%d", localtime(&current_time));
    strncpy(data.date, date_string, sizeof(data.date));
    data.date[sizeof(data.date) - 1] = '\0'; // Ensure null-termination
-   printf("The current date is: %s\n", data.date);
-
 
    // Get current time
    char time_string[sizeof(data.time)];
    strftime(time_string, sizeof(data.time), "%H:%M:%S", localtime(&current_time));
    strncpy(data.time, time_string, sizeof(data.time));
    data.time[sizeof(data.time) - 1] = '\0'; // Ensure null-termination
-   printf("The current time is: %s\n", data.time);
-
+   
    fd = shm_open (SMOBJ_NAME_MEM_CHARS,  O_RDWR  , 00200); /* open s.m object*/
    if(fd == -1)
    {
@@ -32,7 +29,7 @@ void write_to_buffer(char ch, int buffer_index)
 	   exit(1);
    }
    
-   ptr = mmap(NULL, 3100, PROT_WRITE, MAP_SHARED, fd, 0);
+   ptr = mmap(NULL, SIZEOF_BUFFER_DATA_STRUCT*100, PROT_WRITE, MAP_SHARED, fd, 0);
    if(ptr == MAP_FAILED)
    {
       printf("Map failed in write process: %s\n", strerror(errno));
@@ -41,8 +38,8 @@ void write_to_buffer(char ch, int buffer_index)
    
    char *data_ptr= (char*)&data;
    char *address = ptr + (buffer_index * SIZEOF_BUFFER_DATA_STRUCT);
-   memmove(address, data_ptr, SIZEOF_BUFFER_DATA_STRUCT);
-   printf("Char: %s, Date: %s, Time: %s, Address: %s \n", data.character, data.date, data.time, address);
+   memmove(address, data_ptr, sizeof(data));
+   printf("Char: %c, Date: %s, Time: %s, Address: %d\n", data.character, data.date, data.time, &address);
    close(fd);
 }
 
