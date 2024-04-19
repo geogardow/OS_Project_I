@@ -60,6 +60,8 @@ int main()
         struct mem_data data = read_from_mem_data(ptr_read_mem_data);
         
         if (is_finished(data)){
+            sem_post(mem_data_sem);
+            sem_post(read_from_file_sem); // resource released
             break;
         }
 
@@ -137,7 +139,10 @@ char* init_write_memory_block(const char* name, int size){
 
 bool is_finished(struct mem_data mem){
     bool flag;
-    flag = (mem.read_from_file_flag == '1' && mem.write_to_file_flag == '1');
+    if ((mem.write_to_file_counter == mem.read_from_file_counter) && (mem.read_from_file_flag == '1')) 
+        flag = true;
+    else
+        flag = false;
     return flag;
 }
 
@@ -167,11 +172,11 @@ char read_from_file(struct mem_data data, char *ptr_write_mem_data){
     // Read the character at the current file position
     int ch = fgetc(fp);
     if (ch == EOF) {
-        printf("Read file successfully\n");
+        printf("File read successfully\n");
         data.read_from_file_flag = '1';
         write_to_mem_data(data, ptr_write_mem_data);
         fclose(fp);
-        exit(1);
+        return ' ';
     }
 
     data.read_from_file_counter = char_pos + 1;

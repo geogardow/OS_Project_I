@@ -75,7 +75,7 @@ int main()
         sem_wait(write_to_file_sem); // wait to write_to_file to file
         write_to_file(character);
         sem_post(write_to_file_sem); // release resource for other process
-
+        
     }
     
     sem_close(write_to_file_sem);
