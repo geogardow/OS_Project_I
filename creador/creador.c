@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     char* ptr_read_mem_data = init_read_memory_block(SMOBJ_NAME_MEM_DATA);
     char* ptr_read_buffer = init_read_memory_block(SMOBJ_NAME_MEM_CHARS);
     char* ptr_read_mem_stats = init_read_memory_block(SMOBJ_NAME_MEM_STATS);
-    char* ptr_write_buffer = init_write_memory_block(SMOBJ_NAME_MEM_CHARS, SIZEOF_BUFFER_DATA_STRUCT*100);
+    char* ptr_write_buffer = init_write_memory_block(SMOBJ_NAME_MEM_CHARS, SIZEOF_BUFFER_DATA_STRUCT*5);
     char* ptr_write_mem_data = init_write_memory_block(SMOBJ_NAME_MEM_DATA, SIZEOF_SMOBJ_MEM_DATA);
     char* ptr_write_mem_stats = init_write_memory_block(SMOBJ_NAME_MEM_STATS, SIZEOF_SMOBJ_MEM_STATS);
 

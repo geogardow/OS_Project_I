@@ -14,6 +14,7 @@ sem_t *mem_stats_sem;
 
 
 bool is_finished(struct mem_data data);
+bool is_read_finished(struct mem_data mem);
 char read_from_file(struct mem_data data, char* ptr);
 char* init_read_memory_block(const char* name);
 char* init_write_memory_block(const char* name, int size);
@@ -47,7 +48,7 @@ int main()
     char* ptr_read_mem_data = init_read_memory_block(SMOBJ_NAME_MEM_DATA);
     char* ptr_read_buffer = init_read_memory_block(SMOBJ_NAME_MEM_CHARS);
     char* ptr_read_mem_stats = init_read_memory_block(SMOBJ_NAME_MEM_STATS);
-    char* ptr_write_buffer = init_write_memory_block(SMOBJ_NAME_MEM_CHARS, SIZEOF_BUFFER_DATA_STRUCT*100);
+    char* ptr_write_buffer = init_write_memory_block(SMOBJ_NAME_MEM_CHARS, SIZEOF_BUFFER_DATA_STRUCT*5);
     char* ptr_write_mem_data = init_write_memory_block(SMOBJ_NAME_MEM_DATA, SIZEOF_SMOBJ_MEM_DATA);
     char* ptr_write_mem_stats = init_write_memory_block(SMOBJ_NAME_MEM_STATS, SIZEOF_SMOBJ_MEM_STATS);
 
@@ -62,22 +63,26 @@ int main()
             break;
         }
 
-        char ch = read_from_file(data, ptr_write_mem_data);
-        sem_post(mem_data_sem);
-        sem_post(read_from_file_sem); // resource released
+        if (!is_read_finished(data)){
+            char ch = read_from_file(data, ptr_write_mem_data);
+            sem_post(mem_data_sem);
+            sem_post(read_from_file_sem); // resource released
 
-        sem_wait(write_to_buffer_sem); // wait to write buffer
-        int buffer_index = 0;
-        buffer_index = (data.read_from_file_counter) % data.buffer_size;
-        write_to_buffer(ch, buffer_index, ptr_write_buffer);
-        sem_post(read_from_buffer_sem); // tell reconstructor that it can read
+            sem_wait(write_to_buffer_sem); // wait to write buffer
+            int buffer_index = 0;
+            buffer_index = (data.read_from_file_counter) % data.buffer_size;
+            write_to_buffer(ch, buffer_index, ptr_write_buffer);
+            sem_post(read_from_buffer_sem); // tell reconstructor that it can read         
+        }else{
+            sem_post(mem_data_sem);
+            sem_post(read_from_file_sem); // resource released
+            }
     }
 
-    sem_close(write_to_buffer_sem);
-    sem_close(read_from_buffer_sem);
     sem_close(read_from_file_sem);
+    sem_close(write_to_buffer_sem);    
+    sem_close(read_from_buffer_sem);
     sem_close(mem_data_sem);
-
 }
 
 char* init_read_memory_block(const char* name){
@@ -132,6 +137,12 @@ char* init_write_memory_block(const char* name, int size){
 
 bool is_finished(struct mem_data mem){
     bool flag;
+    flag = (mem.read_from_file_flag == '1' && mem.write_to_file_flag == '1');
+    return flag;
+}
+
+bool is_read_finished(struct mem_data mem){
+    bool flag;
     flag = (mem.read_from_file_flag == '1');
     return flag;
 }
@@ -151,15 +162,13 @@ char read_from_file(struct mem_data data, char *ptr_write_mem_data){
     if (fseek(fp, char_pos, SEEK_SET) != 0) {
         printf("Error: fseek failed\n");
         fclose(fp);
-        return 1;
     }
 
     // Read the character at the current file position
     int ch = fgetc(fp);
     if (ch == EOF) {
-        printf("End of file reached\n");
+        printf("Read file successfully\n");
         data.read_from_file_flag = '1';
-        data.read_from_file_counter = char_pos + 1;
         write_to_mem_data(data, ptr_write_mem_data);
         fclose(fp);
         exit(1);

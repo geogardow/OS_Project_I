@@ -48,7 +48,7 @@ struct mem_data read_from_mem_data(char* ptr)
    mem_data.read_from_file_flag = data->read_from_file_flag;
    mem_data.write_to_file_flag = data->write_to_file_flag;
 
-   printf("Buffer size: %d, Read from file counter: %d, Write to file counter: %d, Read from file flag: %d, Write to file flag: %d\n", mem_data.buffer_size, mem_data.read_from_file_counter, mem_data.write_to_file_counter, mem_data.read_from_file_flag, mem_data.write_to_file_flag);
+   printf("Buffer size: %d, Read from file counter: %d, Write to file counter: %d, Read from file flag: %c, Write to file flag: %c\n", mem_data.buffer_size, mem_data.read_from_file_counter, mem_data.write_to_file_counter, mem_data.read_from_file_flag, mem_data.write_to_file_flag);
    //free(data);
 
    return mem_data;

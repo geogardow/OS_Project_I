@@ -48,7 +48,7 @@ int main()
     char* ptr_read_mem_data = init_read_memory_block(SMOBJ_NAME_MEM_DATA);
     char* ptr_read_buffer = init_read_memory_block(SMOBJ_NAME_MEM_CHARS);
     char* ptr_read_mem_stats = init_read_memory_block(SMOBJ_NAME_MEM_STATS);
-    char* ptr_write_buffer = init_write_memory_block(SMOBJ_NAME_MEM_CHARS, SIZEOF_BUFFER_DATA_STRUCT*100);
+    char* ptr_write_buffer = init_write_memory_block(SMOBJ_NAME_MEM_CHARS, SIZEOF_BUFFER_DATA_STRUCT*5);
     char* ptr_write_mem_data = init_write_memory_block(SMOBJ_NAME_MEM_DATA, SIZEOF_SMOBJ_MEM_DATA);
     char* ptr_write_mem_stats = init_write_memory_block(SMOBJ_NAME_MEM_STATS, SIZEOF_SMOBJ_MEM_STATS);
 
@@ -78,10 +78,10 @@ int main()
 
     }
     
-    sem_close(write_to_buffer_sem);
     sem_close(write_to_file_sem);
     sem_close(read_from_buffer_sem);
     sem_close(mem_data_sem);
+    sem_close(write_to_buffer_sem);
     
     return 0;
 }
@@ -136,7 +136,7 @@ char* init_write_memory_block(const char* name, int size){
 }
 
 bool is_finished(struct mem_data data, char* ptr_write_mem_data){
-    if ((data.write_to_file_counter == data.read_from_file_counter) && (data.read_from_file_flag)) {
+    if ((data.write_to_file_counter == data.read_from_file_counter) && (data.read_from_file_flag == '1')) {
         data.write_to_file_flag = '1';
         write_to_mem_data(data, ptr_write_mem_data);
         printf("File copied successfully.\n");
