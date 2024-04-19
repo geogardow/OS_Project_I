@@ -1,23 +1,4 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <semaphore.h>
-#include <fcntl.h>
-#include "../constants.h"
-#include "../memory/read.c"
-#include "../memory/write.c"
-
-sem_t *read_from_buffer_sem;
-sem_t *write_to_buffer_sem;
-sem_t *read_from_file_sem;
-sem_t *mem_data_sem;
-sem_t *mem_stats_sem;
-
-
-bool is_finished(struct mem_data data);
-bool is_read_finished(struct mem_data mem);
-char read_from_file(struct mem_data data, char* ptr);
-char* init_read_memory_block(const char* name);
-char* init_write_memory_block(const char* name, int size);
+#include "cliente.h"
 
 int main()
 {
@@ -54,88 +35,32 @@ int main()
 
     while (true)
     {
-        sem_wait(read_from_file_sem); // wait read is using resource
         sem_wait(mem_data_sem);
-
         struct mem_data data = read_from_mem_data(ptr_read_mem_data);
         
         if (is_finished(data)){
             sem_post(mem_data_sem);
-            sem_post(read_from_file_sem); // resource released
             break;
         }
-
-        if (!is_read_finished(data)){
+        if(!is_read_finished(data)){
+            sem_wait(read_from_file_sem);
+            printf("Buffer size: %d, Read from file counter: %d, Write to file counter: %d, Read from file flag: %c, Write to file flag: %c\n", data.buffer_size, data.read_from_file_counter, data.write_to_file_counter, data.read_from_file_flag, data.write_to_file_flag);
             char ch = read_from_file(data, ptr_write_mem_data);
+            sem_post(read_from_file_sem);
             sem_post(mem_data_sem);
-            sem_post(read_from_file_sem); // resource released
 
-            sem_wait(write_to_buffer_sem); // wait to write buffer
-            int buffer_index = 0;
-            buffer_index = (data.read_from_file_counter) % data.buffer_size;
+            sem_wait(write_to_buffer_sem);
+            int buffer_index = (data.read_from_file_counter) % data.buffer_size;
             write_to_buffer(ch, buffer_index, ptr_write_buffer);
-            sem_post(read_from_buffer_sem); // tell reconstructor that it can read         
-        }else{
+            sem_post(read_from_buffer_sem);   
+        }
+        else{
             sem_post(mem_data_sem);
-            sem_post(read_from_file_sem); // resource released
-            }
+        }
+            
     }
-
     sem_close(read_from_file_sem);
-    sem_close(write_to_buffer_sem);    
-    sem_close(read_from_buffer_sem);
-    sem_close(mem_data_sem);
 }
-
-char* init_read_memory_block(const char* name){
-    int fd;
-    char *ptr;
-    struct stat shmobj_st;
-   
-    fd = shm_open (name,  O_RDONLY  , 00400); /* open s.m object*/
-    if(fd == -1)
-    {
-        printf("Error file descriptor %s\n", strerror(errno));
-        exit(1);
-    }
-    
-    if(fstat(fd, &shmobj_st) == -1)
-    {
-        printf(" error fstat \n");
-        exit(1);
-    }
-
-    ptr = mmap(NULL, shmobj_st.st_size, PROT_READ, MAP_SHARED, fd, 0);
-    if(ptr == MAP_FAILED)
-    {
-        printf("Map failed in read process: %s\n", strerror(errno));
-        exit(1);
-    }
-    close(fd);
-    return ptr;
-}
-
-char* init_write_memory_block(const char* name, int size){
-    int fd;
-    char *ptr;
-    fd = shm_open (name,  O_RDWR  , 00200); /* open s.m object*/
-    if(fd == -1)
-    {
-    printf("Error buffer data file descriptor %s\n", strerror(errno));
-    exit(1);
-    }
-
-    ptr = mmap(NULL, size, PROT_WRITE, MAP_SHARED, fd, 0);
-    if(ptr == MAP_FAILED)
-    {
-    printf("Map failed in write buffer data process: %s\n", strerror(errno));
-    exit(1);
-    }
-
-    close(fd);
-    return ptr;
-}
-
 
 bool is_finished(struct mem_data mem){
     bool flag;

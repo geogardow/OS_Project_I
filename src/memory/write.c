@@ -23,7 +23,8 @@ void write_to_buffer(char ch, int buffer_index, char* ptr)
    char *address = ptr + (buffer_index * SIZEOF_BUFFER_DATA_STRUCT);
 
    memmove(address, data_ptr, sizeof(data));
-   printf("Char: %c, Date: %s, Time: %s, Address: %d\n", data.character, data.date, data.time, &address);
+
+   printf("Char: %c, Date: %s, Time: %s, Buffer Index: %d\n", data.character, data.date, data.time, buffer_index);
 }
 
 void write_to_stats(struct stats_data stats, char* ptr)
