@@ -13,14 +13,28 @@ int main(int argc, char *argv[])
     create_memory(SMOBJ_NAME_MEM_CHARS, SIZEOF_SMOBJ_MEM_CHARS);
     create_memory(SMOBJ_NAME_MEM_DATA, SIZEOF_SMOBJ_MEM_DATA);
     create_memory(SMOBJ_NAME_MEM_STATS, SIZEOF_SMOBJ_MEM_STATS);
-    
-    struct mem_data mem_data_instance;
-    struct stats_data stats_data_instance;
-    build_mem_data_instance(&mem_data_instance);
-    build_stats_data_instance(&stats_data_instance);
 
-    write_to_memdata(mem_data_instance);
-    write_to_stats(stats_data_instance);
+    struct mem_data *mem_data_instance = NULL;
+    mem_data_instance = (struct mem_data *)malloc(SIZEOF_SMOBJ_MEM_DATA);
+    if (mem_data_instance == NULL) {
+        printf("Error: Memory allocation failed\n");
+        exit(1);
+    }
+
+    struct stats_data *stats_data_instance = NULL;
+    stats_data_instance = (struct stats_data *)malloc(SIZEOF_SMOBJ_MEM_STATS);
+    if (stats_data_instance == NULL) {
+        printf("Error: Memory allocation failed\n");
+        exit(1);
+    }
+    
+    build_mem_data_instance(mem_data_instance);
+    build_stats_data_instance(stats_data_instance);
+
+    printf("Buffer size: %d\n", mem_data_instance->buffer_size);
+
+    write_to_mem_data(*mem_data_instance);
+    write_to_stats(*stats_data_instance);
 
     init_semaphores();
 
@@ -29,7 +43,7 @@ int main(int argc, char *argv[])
 
 void create_memory(const char *name, int size){
     int fd;
-    fd = shm_open(name, O_CREAT | O_RDWR  , 00700); /* create s.m object*/
+    fd = shm_open(name, O_CREAT | O_RDWR | O_TRUNC  , 00700); /* create s.m object*/
     if(fd == -1)
     {
         printf("Error file descriptor \n");
@@ -63,18 +77,18 @@ void init_semaphores(){
 
 void build_mem_data_instance(struct mem_data *mem_data_instance){
     mem_data_instance->buffer_size = CHARS_IN_BUFFER; // Tamaño del buffer circular
-    mem_data_instance->read_counter = 0;
-    mem_data_instance->write_counter = 0;
-    mem_data_instance->read_flag = '0'; // Flag como caracter '0' (no leído)
-    mem_data_instance->write_flag = '0'; // Flag como caracter '0' (no escrito)
+    mem_data_instance->read_from_file_counter = 0;
+    mem_data_instance->write_to_file_counter = 0;
+    mem_data_instance->read_from_file_flag = '0'; // Flag como caracter '0' (no leído)
+    mem_data_instance->write_to_file_flag = '0'; // Flag como caracter '0' (no escrito)
 }
 
 void print_data_struct(struct mem_data *data) {
     printf("Buffer Size: %d\n", data->buffer_size);
-    printf("Read Counter: %d\n", data->read_counter);
-    printf("Write Counter: %d\n", data->write_counter);
-    printf("Read Flag: %c\n", data->read_flag);
-    printf("Write Flag: %c\n", data->write_flag);
+    printf("Read Counter: %d\n", data->read_from_file_counter);
+    printf("Write Counter: %d\n", data->write_to_file_counter);
+    printf("Read Flag: %c\n", data->read_from_file_flag);
+    printf("Write Flag: %c\n", data->write_to_file_flag);
 }
 
 void build_stats_data_instance(struct stats_data *stats_data_instance){

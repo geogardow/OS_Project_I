@@ -15,6 +15,6 @@ int main(){
 
     struct mem_data mem;
     mem = read_from_mem_data();
-    printf("Buffer size: %d, Read Counter: %d, Read Flag: %c\n", mem.buffer_size, mem.read_counter, mem.read_flag);
+    printf("Buffer size: %d, Read Counter: %d, Read Flag: %c\n", mem.buffer_size, mem.read_from_file_counter, mem.read_from_file_flag);
     return 0;
 }

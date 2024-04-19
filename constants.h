@@ -32,10 +32,10 @@ struct buffer_data {
 
 struct mem_data {
     int buffer_size;
-    int read_counter;
-    int write_counter;
-    char read_flag;
-    char write_flag;
+    int read_from_file_counter;
+    int write_to_file_counter;
+    char read_from_file_flag;
+    char write_to_file_flag;
 };
 
 struct stats_data {

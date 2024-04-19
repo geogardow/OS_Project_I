@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include "../constants.h"
 #include "../memory/read.c"
+#include "../memory/write.c"
 
 sem_t *read_from_buffer_sem;
 sem_t *write_to_buffer_sem;
@@ -12,8 +13,8 @@ sem_t *mem_data_sem;
 sem_t *mem_stats_sem;
 
 
-bool is_finished(struct mem_data data);
-int read_char(struct mem_data data);
+bool is_finished(struct mem_data* data);
+char read_from_file(struct mem_data *data);
 
 int main()
 {
@@ -46,17 +47,18 @@ int main()
         sem_wait(read_from_file_sem); // wait read is using resource
         sem_wait(mem_data_sem);
         struct mem_data data = read_from_mem_data();
-        
-        if (is_finished(data)){
+
+        if (is_finished(&data)){
             break;
         }
 
-        read_char(data);
+        char ch = read_from_file(&data);
+        printf("Counter: %d\n", data.read_from_file_counter);
         sem_post(mem_data_sem);
         sem_post(read_from_file_sem); // resource released
 
         sem_wait(write_to_buffer_sem); // wait to write buffer
-        // write to buffer
+        write_to_buffer(ch, (data.read_from_file_counter - 1) % data.buffer_size);
         sem_post(read_from_buffer_sem); // tell reconstructor that it can read
 
     }
@@ -68,13 +70,13 @@ int main()
 
 }
 
-bool is_finished(struct mem_data mem){
+bool is_finished(struct mem_data* mem){
     bool flag;
-    flag = (mem.read_flag == '1');
+    flag = (mem->read_from_file_flag == '1');
     return flag;
 }
 
-int read_char(struct mem_data data){
+char read_from_file(struct mem_data *data){
     const char* filename = "input.txt";
     FILE* fp = fopen(filename, "r");
 
@@ -83,7 +85,7 @@ int read_char(struct mem_data data){
         return 1;
     }
 
-    int char_pos = data.read_counter;
+    int char_pos = data->read_from_file_counter;
 
     // Move the file pointer to char_pos character
     if (fseek(fp, char_pos, SEEK_SET) != 0) {
@@ -96,20 +98,20 @@ int read_char(struct mem_data data){
     int ch = fgetc(fp);
     if (ch == EOF) {
         printf("Error: End of file reached\n");
-        data.read_flag = '1';
-        write_to_mem_data(data);
+        data->read_from_file_flag = '1';
+        data->read_from_file_counter = char_pos + 1;
+        write_to_mem_data(*data);
         fclose(fp);
-        return 1;
+        exit(1);
     }
 
-    data.read_counter = char_pos + 1;
+    data->read_from_file_counter = char_pos + 1;
 
-    write_to_mem_data(data);
+    write_to_mem_data(*data);
     
     printf("The character in the file is: %c\n", (char)ch);
 
-    // Close the file
     fclose(fp);
 
-    return 0;
+    return ch;
 }
