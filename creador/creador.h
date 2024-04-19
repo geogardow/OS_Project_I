@@ -28,5 +28,7 @@ void init_semaphores();
 void build_mem_data_instance(struct mem_data *mem_data_instance);
 void print_data_struct(struct mem_data *data);
 void build_stats_data_instance(struct stats_data *stats_data_instance);
+char* init_read_memory_block(const char* name);
+char* init_write_memory_block(const char* name, int size);
 
 #endif

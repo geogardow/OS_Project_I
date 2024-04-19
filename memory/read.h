@@ -13,8 +13,8 @@
 #include <time.h>
 #include "../constants.h"
 
-struct buffer_data read_from_buffer(int buffer_index);
-struct stats_data read_from_stats();
-struct mem_data read_from_mem_data();
+struct buffer_data* read_from_buffer(int buffer_index, char* ptr);
+struct stats_data read_from_stats(char* ptr);
+struct mem_data read_from_mem_data(char* ptr);
 
 #endif 

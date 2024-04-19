@@ -1,11 +1,8 @@
 #include "write.h"
 
 
-void write_to_buffer(char ch, int buffer_index)
+void write_to_buffer(char ch, int buffer_index, char* ptr)
 {
-   int fd;
-   char *ptr;
-
    struct buffer_data data;
    data.character = ch;
    
@@ -22,71 +19,21 @@ void write_to_buffer(char ch, int buffer_index)
    strncpy(data.time, time_string, sizeof(data.time));
    data.time[sizeof(data.time) - 1] = '\0'; // Ensure null-termination
    
-   fd = shm_open (SMOBJ_NAME_MEM_CHARS,  O_RDWR  , 00200); /* open s.m object*/
-   if(fd == -1)
-   {
-      printf("Error buffer data file descriptor %s\n", strerror(errno));
-	   exit(1);
-   }
-   
-   ptr = mmap(NULL, SIZEOF_BUFFER_DATA_STRUCT*100, PROT_WRITE, MAP_SHARED, fd, 0);
-   if(ptr == MAP_FAILED)
-   {
-      printf("Map failed in write buffer data process: %s\n", strerror(errno));
-      exit(1);
-   }
-   
    char *data_ptr= (char*)&data;
    char *address = ptr + (buffer_index * SIZEOF_BUFFER_DATA_STRUCT);
+
    memmove(address, data_ptr, sizeof(data));
    printf("Char: %c, Date: %s, Time: %s, Address: %d\n", data.character, data.date, data.time, &address);
-   close(fd);
 }
 
-void write_to_stats(struct stats_data stats)
+void write_to_stats(struct stats_data stats, char* ptr)
 {
-   int fd;
-   char *ptr;
-
-   fd = shm_open (SMOBJ_NAME_MEM_STATS,  O_RDWR  , 00200); /* open s.m object*/
-   if(fd == -1)
-   {
-      printf("Error stats data file descriptor %s\n", strerror(errno));
-	   exit(1);
-   }
-   
-   ptr = mmap(NULL, SIZEOF_SMOBJ_MEM_STATS, PROT_WRITE, MAP_SHARED, fd, 0);
-   if(ptr == MAP_FAILED)
-   {
-      printf("Map failed in write stats data process: %s\n", strerror(errno));
-      exit(1);
-   }
-   
    char *data_ptr= (char*)&stats;
    memmove(ptr, data_ptr, SIZEOF_SMOBJ_MEM_STATS);
-   close(fd);
 }
 
-void write_to_mem_data(struct mem_data mem)
+void write_to_mem_data(struct mem_data mem, char* ptr)
 {
-   int fd;
-   char *ptr;
-
-   fd = shm_open (SMOBJ_NAME_MEM_DATA,  O_RDWR  , 00200); /* open s.m object*/
-   if(fd == -1)
-   {
-      printf("Error mem data file descriptor %s\n", strerror(errno));
-	   exit(1);
-   }
-   
-   ptr = mmap(NULL, SIZEOF_SMOBJ_MEM_DATA, PROT_WRITE, MAP_SHARED, fd, 0);
-   if(ptr == MAP_FAILED)
-   {
-      printf("Map failed in write mem data process: %s\n", strerror(errno));
-      exit(1);
-   }
-   
    char *data_ptr= (char*)&mem;
    memmove(ptr, data_ptr, SIZEOF_SMOBJ_MEM_DATA);
-   close(fd);
 }

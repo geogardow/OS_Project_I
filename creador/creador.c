@@ -14,31 +14,75 @@ int main(int argc, char *argv[])
     create_memory(SMOBJ_NAME_MEM_DATA, SIZEOF_SMOBJ_MEM_DATA);
     create_memory(SMOBJ_NAME_MEM_STATS, SIZEOF_SMOBJ_MEM_STATS);
 
-    struct mem_data *mem_data_instance = NULL;
-    mem_data_instance = (struct mem_data *)malloc(SIZEOF_SMOBJ_MEM_DATA);
-    if (mem_data_instance == NULL) {
-        printf("Error: Memory allocation failed\n");
-        exit(1);
-    }
+    char* ptr_read_mem_data = init_read_memory_block(SMOBJ_NAME_MEM_DATA);
+    char* ptr_read_buffer = init_read_memory_block(SMOBJ_NAME_MEM_CHARS);
+    char* ptr_read_mem_stats = init_read_memory_block(SMOBJ_NAME_MEM_STATS);
+    char* ptr_write_buffer = init_write_memory_block(SMOBJ_NAME_MEM_CHARS, SIZEOF_BUFFER_DATA_STRUCT*100);
+    char* ptr_write_mem_data = init_write_memory_block(SMOBJ_NAME_MEM_DATA, SIZEOF_SMOBJ_MEM_DATA);
+    char* ptr_write_mem_stats = init_write_memory_block(SMOBJ_NAME_MEM_STATS, SIZEOF_SMOBJ_MEM_STATS);
 
-    struct stats_data *stats_data_instance = NULL;
-    stats_data_instance = (struct stats_data *)malloc(SIZEOF_SMOBJ_MEM_STATS);
-    if (stats_data_instance == NULL) {
-        printf("Error: Memory allocation failed\n");
-        exit(1);
-    }
-    
-    build_mem_data_instance(mem_data_instance);
-    build_stats_data_instance(stats_data_instance);
+    struct mem_data mem_data_instance;
+    struct stats_data stats_data_instance;
+    build_mem_data_instance(&mem_data_instance);
+    build_stats_data_instance(&stats_data_instance);
 
-    printf("Buffer size: %d\n", mem_data_instance->buffer_size);
-
-    write_to_mem_data(*mem_data_instance);
-    write_to_stats(*stats_data_instance);
+    write_to_mem_data(mem_data_instance, ptr_write_mem_data);
+    write_to_stats(stats_data_instance, ptr_write_mem_stats);
 
     init_semaphores();
 
+
     return 0;
+}
+
+
+char* init_read_memory_block(const char* name){
+    int fd;
+    char *ptr;
+    struct stat shmobj_st;
+   
+    fd = shm_open (name,  O_RDONLY  , 00400); /* open s.m object*/
+    if(fd == -1)
+    {
+        printf("Error file descriptor %s\n", strerror(errno));
+        exit(1);
+    }
+    
+    if(fstat(fd, &shmobj_st) == -1)
+    {
+        printf(" error fstat \n");
+        exit(1);
+    }
+
+    ptr = mmap(NULL, shmobj_st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+    if(ptr == MAP_FAILED)
+    {
+        printf("Map failed in read process: %s\n", strerror(errno));
+        exit(1);
+    }
+    close(fd);
+    return ptr;
+}
+
+char* init_write_memory_block(const char* name, int size){
+    int fd;
+    char *ptr;
+    fd = shm_open (name,  O_RDWR  , 00200); /* open s.m object*/
+    if(fd == -1)
+    {
+    printf("Error buffer data file descriptor %s\n", strerror(errno));
+    exit(1);
+    }
+
+    ptr = mmap(NULL, size, PROT_WRITE, MAP_SHARED, fd, 0);
+    if(ptr == MAP_FAILED)
+    {
+    printf("Map failed in write buffer data process: %s\n", strerror(errno));
+    exit(1);
+    }
+
+    close(fd);
+    return ptr;
 }
 
 void create_memory(const char *name, int size){
