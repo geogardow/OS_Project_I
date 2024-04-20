@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
         if(is_finished(data, ptr_write_mem_data)){
             sem_post(mem_data_sem);
             sem_post(write_to_buffer_sem); // the resource is ready to be written
+            sem_post(read_from_buffer_sem);
             break;
         }
 
