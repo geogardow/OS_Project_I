@@ -18,6 +18,8 @@ sem_t *mem_data_sem;
 sem_t *mem_stats_sem;
 sem_t *read_from_file_sem;
 
+int MODE;
+
 void write_to_file(char ch);
 bool is_finished(struct mem_data data, char* ptr_write_mem_data);
 

@@ -1,7 +1,14 @@
 #include "cliente.h"
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc != MAX_ARGS + 1) {
+        printf("Error, only one argument is allowed\n");
+        return 1;
+    }
+
+    MODE = atoi(argv[1]);
+
     read_from_file_sem = sem_open(SMOBJ_SEM_READ_FILE, 0);
     if (read_from_file_sem == SEM_FAILED){
         printf("Error: Could not open read file semaphore");
@@ -29,12 +36,22 @@ int main()
     char* ptr_read_mem_data = init_read_memory_block(SMOBJ_NAME_MEM_DATA);
     char* ptr_read_buffer = init_read_memory_block(SMOBJ_NAME_MEM_CHARS);
     char* ptr_read_mem_stats = init_read_memory_block(SMOBJ_NAME_MEM_STATS);
-    char* ptr_write_buffer = init_write_memory_block(SMOBJ_NAME_MEM_CHARS, SIZEOF_BUFFER_DATA_STRUCT*5);
     char* ptr_write_mem_data = init_write_memory_block(SMOBJ_NAME_MEM_DATA, SIZEOF_SMOBJ_MEM_DATA);
     char* ptr_write_mem_stats = init_write_memory_block(SMOBJ_NAME_MEM_STATS, SIZEOF_SMOBJ_MEM_STATS);
 
+    sem_wait(mem_data_sem);
+    struct mem_data data = read_from_mem_data(ptr_read_mem_data);
+    char* ptr_write_buffer = init_write_memory_block(SMOBJ_NAME_MEM_CHARS, SIZEOF_BUFFER_DATA_STRUCT*data.buffer_size);
+    sem_post(mem_data_sem);
+
     while (true)
     {
+        if (MODE == 1)
+        {
+            printf("Press Enter to continue...\n");
+            getchar();
+        }
+        
         sem_wait(read_from_file_sem);
         sem_wait(mem_data_sem);
         struct mem_data data = read_from_mem_data(ptr_read_mem_data);
