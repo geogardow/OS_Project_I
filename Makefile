@@ -19,8 +19,14 @@ all:
 create:
 	@$(MAKE) -C src create
 	
+clientv:
+	@$(MAKE) -C src clientv
+	
 client:
 	@$(MAKE) -C src client
+
+rebuildv:
+	@$(MAKE) -C src rebuildv
 	
 rebuild:
 	@$(MAKE) -C src rebuild

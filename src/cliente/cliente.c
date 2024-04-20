@@ -123,37 +123,62 @@ bool is_read_finished(struct mem_data mem){
 
 char read_from_file(struct mem_data data, char *ptr_write_mem_data, char *ptr_read_mem_data){
     const char* filename = "input.txt";
-    FILE* fp = fopen(filename, "r");
+    FILE* input_file = fopen(filename, "r");
+    const char* output_filename = "live_read.txt";
+    FILE* output_file = fopen(output_filename, "w");
 
-    if (fp == NULL) {
+    if (input_file == NULL) {
         printf("Error: Could not open file %s\n", filename);
         return 1;
+    }
+
+    if (output_file == NULL) {
+        printf("Error: Could not open file %s\n", output_filename);
+        exit(1);
     }
 
     int char_pos = data.read_from_file_counter;
 
     // Move the file pointer to char_pos character
-    if (fseek(fp, char_pos, SEEK_SET) != 0) {
+    if (fseek(input_file, char_pos, SEEK_SET) != 0) {
         printf("Error: fseek failed\n");
-        fclose(fp);
+        fclose(input_file);
     }
 
     // Read the character at the current file position
-    int ch = fgetc(fp);
+    int ch = fgetc(input_file);
     if (ch == EOF) {
         data.read_from_file_flag = '1';
         write_to_mem_data(data, ptr_write_mem_data);
         printf("File read successfully\n");
-        fclose(fp);
+        fclose(input_file);
         return ' ';
     }
 
-    data.read_from_file_counter = char_pos + 1;
+    int current_pos = char_pos + 1;
+
+    // Move the file pointer to char_pos character
+    if (fseek(input_file, current_pos, SEEK_SET) != 0) {
+        printf("Error: fseek failed\n");
+        fclose(input_file);
+    }
+
+    int ch_out;
+    while ((ch_out = fgetc(input_file)) != EOF) {
+        fputc(ch_out, output_file);
+    }
+
+    data.read_from_file_counter = current_pos;
     write_to_mem_data(data, ptr_write_mem_data);
 
-    fclose(fp);
+    fclose(input_file);
+    fclose(output_file);
 
     return ch;
+}
+
+void save_file_progress(int char_pos){
+    
 }
 
 void save_stats(char *ptr_write_mem_stats, char *ptr_read_mem_stats){
