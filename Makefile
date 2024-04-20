@@ -2,20 +2,19 @@
 .PHONY: all create
 .PHONY: all client
 .PHONY: all rebuild
+.PHONY: all stats
+
 BUILD_CLIENTE = cliente
 BUILD_CREADOR = creador
 BUILD_RECONSTRUCTOR = reconstructor
 
 # Library paths
-INPUTS_PATH = ./inputs
-OUTPUTS_PATH = ./outputs
 BIN_PATH = ./bin
-INPUT_FILE = $(INPUTS_PATH)/input.txt
-OUTPUT_FILE = $(OUTPUTS_PATH)/output.txt
+
 
 all:
 	@echo "Building bins..."
-	@$(MAKE) -C src
+	@$(MAKE) -B -C src
 	
 create:
 	@$(MAKE) -C src create
@@ -25,6 +24,9 @@ client:
 	
 rebuild:
 	@$(MAKE) -C src rebuild
+	
+stats:
+	@$(MAKE) -C src stats
 	
 clean:
 	@$(MAKE) -C src clean

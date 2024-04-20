@@ -90,7 +90,7 @@ void build_stats_data_instance(struct stats_data *stats_data_instance){
     stats_data_instance->reconstructor_blocked_time = 0;
     stats_data_instance->transferred_chars = 0;
     stats_data_instance->chars_in_buffer = 0;
-    stats_data_instance->used_memory = 0;
+    stats_data_instance->used_memory = SIZEOF_SMOBJ_MEM_CHARS + SIZEOF_SMOBJ_MEM_DATA + SIZEOF_SMOBJ_MEM_STATS + sizeof(sem_t) * 6;
     stats_data_instance->client_kernel_time = 0;
     stats_data_instance->reconstructor_kernel_time = 0;
     stats_data_instance->client_user_time = 0;

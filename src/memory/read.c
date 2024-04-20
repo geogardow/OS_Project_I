@@ -25,7 +25,7 @@ struct stats_data read_from_stats(char* ptr)
       exit(1);
    }
    
-   data = (struct stats_data *)&ptr;
+   data = (struct stats_data *)ptr;
 
    return *data;
 }
@@ -41,12 +41,5 @@ struct mem_data read_from_mem_data(char* ptr)
    
    data = (struct mem_data *)ptr;
 
-   struct mem_data mem_data;
-   mem_data.buffer_size = data->buffer_size;
-   mem_data.read_from_file_counter = data->read_from_file_counter;
-   mem_data.write_to_file_counter = data->write_to_file_counter;
-   mem_data.read_from_file_flag = data->read_from_file_flag;
-   mem_data.write_to_file_flag = data->write_to_file_flag;
-
-   return mem_data;
+   return *data;
 }
