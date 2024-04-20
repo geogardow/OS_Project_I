@@ -1,5 +1,6 @@
 #include "creador.h"
 
+
 int main(int argc, char *argv[])
 {
     if (argc != MAX_ARGS + 1) {
@@ -32,7 +33,31 @@ int main(int argc, char *argv[])
     init_semaphores();
 
 
+    print_chars_memory(ptr_read_buffer, ptr_read_mem_data);
+
     return 0;
+
+}
+
+void print_chars_memory(char *ptr_read_mem_buffer, char* ptr_read_mem_data){
+    while (true)
+    {
+        struct mem_data mem_data_instance = read_from_mem_data(ptr_read_mem_data);
+        if (mem_data_instance.read_from_file_flag == '1' && mem_data_instance.write_to_file_flag == '1')
+        {
+            break;
+        }
+        for(int i = 0; i < CHARS_IN_BUFFER; i++){
+            struct buffer_data *buffer_data_instance = read_from_buffer(i, ptr_read_mem_buffer);
+        }
+        // Flush stdout to ensure all output is printed to the console
+        fflush(stdout);
+
+        // Check for new data every 1 second
+        sleep(1);
+        system("clear");   
+    }
+    
 }
 
 void create_memory(const char *name, int size){
