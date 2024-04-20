@@ -12,6 +12,7 @@
 #include "../memory/write.c"
 #include "../memory/init.c"
 #include "../constants.h"
+#include <time.h>
 
 sem_t *read_from_buffer_sem;
 sem_t *write_to_buffer_sem;
@@ -27,7 +28,6 @@ int CHARS_IN_BUFFER;
 void create_memory(const char *name, int size);
 void init_semaphores();
 void build_mem_data_instance(struct mem_data *mem_data_instance);
-void print_data_struct(struct mem_data *data);
 void build_stats_data_instance(struct stats_data *stats_data_instance);
 
 #endif

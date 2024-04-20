@@ -12,7 +12,7 @@ struct buffer_data* read_from_buffer(int buffer_index, char* ptr)
    }
    
    data = (struct buffer_data *)address;
-   printf("Char: %c, Date: %s, Time: %s\n", data->character, data->date, data->time);
+   printf("Char: %c, Date: %s, Time: %s, Buffer Index: %d\n", data->character, data->date, data->time, buffer_index);
    return data;
 }
 

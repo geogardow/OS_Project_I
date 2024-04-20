@@ -77,19 +77,11 @@ void build_mem_data_instance(struct mem_data *mem_data_instance){
     mem_data_instance->write_to_file_flag = '0'; // Flag como caracter '0' (no escrito)
 }
 
-void print_data_struct(struct mem_data *data) {
-    printf("Buffer Size: %d\n", data->buffer_size);
-    printf("Read Counter: %d\n", data->read_from_file_counter);
-    printf("Write Counter: %d\n", data->write_to_file_counter);
-    printf("Read Flag: %c\n", data->read_from_file_flag);
-    printf("Write Flag: %c\n", data->write_to_file_flag);
-}
-
 void build_stats_data_instance(struct stats_data *stats_data_instance){
     stats_data_instance->client_blocked_time = 0;
     stats_data_instance->reconstructor_blocked_time = 0;
     stats_data_instance->transferred_chars = 0;
-    stats_data_instance->chars_in_buffer = 0;
+    stats_data_instance->chars_in_buffer = CHARS_IN_BUFFER;
     stats_data_instance->used_memory = SIZEOF_SMOBJ_MEM_CHARS + SIZEOF_SMOBJ_MEM_DATA + SIZEOF_SMOBJ_MEM_STATS + sizeof(sem_t) * 6;
     stats_data_instance->client_kernel_time = 0;
     stats_data_instance->reconstructor_kernel_time = 0;

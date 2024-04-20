@@ -39,15 +39,15 @@ struct mem_data {
 };
 
 struct stats_data {
-    float client_blocked_time;
-    float reconstructor_blocked_time;
+    double client_blocked_time;
+    double reconstructor_blocked_time;
     int transferred_chars;
     int chars_in_buffer;
     int used_memory;
-    float client_kernel_time;
-    float reconstructor_kernel_time;
-    float client_user_time;
-    float reconstructor_user_time;
+    double client_kernel_time;
+    double reconstructor_kernel_time;
+    double client_user_time;
+    double reconstructor_user_time;
 };
 
 #endif
