@@ -61,22 +61,22 @@ int main(int argc, char *argv[])
         sem_wait(read_from_buffer_sem);
         sem_wait(mem_data_sem);
         struct mem_data data = read_from_mem_data(ptr_read_mem_data);
-        printf("Buffer size: %d, Read from file counter: %d, Write to file counter: %d, Read from file flag: %c, Write to file flag: %c\n", data.buffer_size, data.read_from_file_counter, data.write_to_file_counter, data.read_from_file_flag, data.write_to_file_flag);
-        int buffer_index = data.write_to_file_counter % data.buffer_size;
-
-        struct buffer_data* data_from_buffer_ptr = read_from_buffer(buffer_index, ptr_read_buffer);
-        char character = data_from_buffer_ptr->character;
-
+        
         if(is_finished(data, ptr_write_mem_data)){
             sem_post(mem_data_sem);
             sem_post(write_to_buffer_sem); // the resource is ready to be written
             break;
         }
-        
+
+        sem_wait(write_to_file_sem); // wait to write_to_file to file
+        printf("Buffer size: %d, Read from file counter: %d, Write to file counter: %d, Read from file flag: %c, Write to file flag: %c\n", data.buffer_size, data.read_from_file_counter, data.write_to_file_counter, data.read_from_file_flag, data.write_to_file_flag);
+        int buffer_index = data.write_to_file_counter % data.buffer_size;
+        struct buffer_data* data_from_buffer_ptr = read_from_buffer(buffer_index, ptr_read_buffer);
+        char character = data_from_buffer_ptr->character;
+
         sem_post(mem_data_sem);
         sem_post(write_to_buffer_sem); // the resource is ready to be written
 
-        sem_wait(write_to_file_sem); // wait to write_to_file to file
         write_to_file(character);
         sem_post(write_to_file_sem); // release resource for other process   
     }

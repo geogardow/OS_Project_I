@@ -57,6 +57,7 @@ int main(int argc, char *argv[])
         struct mem_data data = read_from_mem_data(ptr_read_mem_data);
 
         if (is_finished(data)){
+            printf("Llegúe");
             printf("Buffer size: %d, Read from file counter: %d, Write to file counter: %d, Read from file flag: %c, Write to file flag: %c\n", data.buffer_size, data.read_from_file_counter, data.write_to_file_counter, data.read_from_file_flag, data.write_to_file_flag);
             sem_post(mem_data_sem);
             sem_post(read_from_file_sem);

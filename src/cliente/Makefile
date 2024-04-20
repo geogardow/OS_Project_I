@@ -8,6 +8,7 @@ BIN_PATH = ../../bin
 # Compiler and flags
 CC = gcc
 THREADFLAGS = -lrt -lpthread
+MODE := 0
 
 all: $(BUILD_CLIENTE)
 
@@ -15,7 +16,7 @@ $(BUILD_CLIENTE): $(SRC)
 	$(CC) -o $(BIN_PATH)/$@ $< $(THREADFLAGS)
 	
 client:
-	$(BIN_PATH)/$(BUILD_CLIENTE)
+	$(BIN_PATH)/$(BUILD_CLIENTE) $(MODE)
 	
 clean:
 	rm -f $(BIN_PATH)/$(BUILD_CLIENTE)
