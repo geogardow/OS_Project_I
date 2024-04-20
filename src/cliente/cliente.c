@@ -35,31 +35,28 @@ int main()
 
     while (true)
     {
+        sem_wait(read_from_file_sem);
         sem_wait(mem_data_sem);
         struct mem_data data = read_from_mem_data(ptr_read_mem_data);
-        
+
         if (is_finished(data)){
+            printf("Buffer size: %d, Read from file counter: %d, Write to file counter: %d, Read from file flag: %c, Write to file flag: %c\n", data.buffer_size, data.read_from_file_counter, data.write_to_file_counter, data.read_from_file_flag, data.write_to_file_flag);
             sem_post(mem_data_sem);
+            sem_post(read_from_file_sem);
             break;
         }
-        if(!is_read_finished(data)){
-            sem_wait(read_from_file_sem);
-            printf("Buffer size: %d, Read from file counter: %d, Write to file counter: %d, Read from file flag: %c, Write to file flag: %c\n", data.buffer_size, data.read_from_file_counter, data.write_to_file_counter, data.read_from_file_flag, data.write_to_file_flag);
-            char ch = read_from_file(data, ptr_write_mem_data);
-            sem_post(read_from_file_sem);
-            sem_post(mem_data_sem);
 
-            sem_wait(write_to_buffer_sem);
-            int buffer_index = (data.read_from_file_counter) % data.buffer_size;
-            write_to_buffer(ch, buffer_index, ptr_write_buffer);
-            sem_post(read_from_buffer_sem);   
-        }
-        else{
-            sem_post(mem_data_sem);
-        }
-            
+        printf("Buffer size: %d, Read from file counter: %d, Write to file counter: %d, Read from file flag: %c, Write to file flag: %c\n", data.buffer_size, data.read_from_file_counter, data.write_to_file_counter, data.read_from_file_flag, data.write_to_file_flag);
+        char ch = read_from_file(data, ptr_write_mem_data, ptr_read_mem_data);
+        sem_post(mem_data_sem);
+
+        sem_wait(write_to_buffer_sem);
+        int buffer_index = (data.read_from_file_counter) % data.buffer_size;
+        write_to_buffer(ch, buffer_index, ptr_write_buffer);
+        sem_post(read_from_buffer_sem);  
+
+        sem_post(read_from_file_sem);
     }
-    sem_close(read_from_file_sem);
 }
 
 bool is_finished(struct mem_data mem){
@@ -77,7 +74,7 @@ bool is_read_finished(struct mem_data mem){
     return flag;
 }
 
-char read_from_file(struct mem_data data, char *ptr_write_mem_data){
+char read_from_file(struct mem_data data, char *ptr_write_mem_data, char *ptr_read_mem_data){
     const char* filename = "input.txt";
     FILE* fp = fopen(filename, "r");
 
@@ -85,8 +82,8 @@ char read_from_file(struct mem_data data, char *ptr_write_mem_data){
         printf("Error: Could not open file %s\n", filename);
         return 1;
     }
-    int char_pos = 0;
-    char_pos = data.read_from_file_counter;
+
+    int char_pos = data.read_from_file_counter;
 
     // Move the file pointer to char_pos character
     if (fseek(fp, char_pos, SEEK_SET) != 0) {
@@ -97,15 +94,15 @@ char read_from_file(struct mem_data data, char *ptr_write_mem_data){
     // Read the character at the current file position
     int ch = fgetc(fp);
     if (ch == EOF) {
-        printf("File read successfully\n");
         data.read_from_file_flag = '1';
         write_to_mem_data(data, ptr_write_mem_data);
+        printf("File read successfully\n");
         fclose(fp);
         return ' ';
     }
 
+    printf("Char: %c\n", ch);
     data.read_from_file_counter = char_pos + 1;
-
     write_to_mem_data(data, ptr_write_mem_data);
 
     fclose(fp);

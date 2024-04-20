@@ -18,6 +18,6 @@ sem_t *mem_stats_sem;
 
 bool is_finished(struct mem_data data);
 bool is_read_finished(struct mem_data mem);
-char read_from_file(struct mem_data data, char* ptr);
+char read_from_file(struct mem_data data, char *ptr_write_mem_data, char *ptr_read_mem_data);
 
 #endif
